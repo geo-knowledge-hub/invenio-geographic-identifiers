@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "local://geoidentifiers/geoidentifier-v1.0.0.json",
+  "description": "Geographic identifiers from specific vocabularies.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "$ref": "local://definitions-v1.0.0.json#/$schema"
+    },
+    "id": {
+      "description": "URI or classification code as identifier - globally unique among all geographic identifier schemes.",
+      "$ref": "local://definitions-v1.0.0.json#/identifier"
+    },
+    "pid": {
+      "$ref": "local://definitions-v1.0.0.json#/internal-pid"
+    },
+    "scheme": {
+      "description": "Identifier of the subject scheme.",
+      "$ref": "local://definitions-v1.0.0.json#/identifier"
+    },
+    "name": {
+      "description": "Human readable label.",
+      "type": "string"
+    }
+  }
+}
