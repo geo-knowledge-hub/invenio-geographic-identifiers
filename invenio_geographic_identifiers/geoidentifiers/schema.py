@@ -21,4 +21,4 @@ class GeographicIdentifiersSchema(BaseVocabularySchema):
     id = SanitizedUnicode(required=True)
     scheme = SanitizedUnicode(required=True)
     name = SanitizedUnicode(required=True)
-    location = SanitizedUnicode(required=True)  # test
+    location = SanitizedUnicode(required=True)

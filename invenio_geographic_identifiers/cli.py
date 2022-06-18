@@ -23,23 +23,24 @@ from .contrib.geonames.datastreams import DATASTREAM_CONFIG as geonames_ds_confi
 
 def get_service_for_vocabulary(vocabulary):
     """Generate the DataStream service."""
-    if vocabulary == "geonames":
+    if vocabulary == "geoidentifiers":
         return current_service_registry.get("geoidentifiers")
 
 
 def get_config_for_ds(vocabulary, filepath=None, origin=None):
     """Generate the DataStream configuration."""
-    if vocabulary == "geonames":
+    if vocabulary == "geoidentifiers":
         config = deepcopy(geonames_ds_config)
 
         if filepath:
             with open(filepath) as f:
                 config = yaml.safe_load(f).get(vocabulary)
-        
+
         if origin:
             config["readers"][0]["args"]["origin"] = origin
 
-    return config
+        return config
+
 
 @click.group()
 def geoidentifiers():
@@ -69,7 +70,7 @@ def _process_vocab(config, num_samples=None):
         if left == 0:
             click.secho(f"Number of samples reached {num_samples}", fg="green")
             break
-    return success, errored, 
+    return success, errored,
 
 
 def _output_process(vocabulary, op, success, errored, filtered):
