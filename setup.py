@@ -80,6 +80,9 @@ setup(
     include_package_data=True,
     platforms='any',
     entry_points={
+        'flask.commands': [
+            'geoidentifiers = invenio_geographic_identifiers.cli:geoidentifiers'
+        ],
         'invenio_base.apps': [
             'geoidentifiers = invenio_geographic_identifiers:InvenioGeographicIdentifiers',
         ],
@@ -101,9 +104,6 @@ setup(
         "invenio_search.mappings": [
             "geoidentifiers = invenio_geographic_identifiers.geoidentifiers.mappings"
         ],
-        "invenio_celery.tasks": [
-            "geoidentifiers_fixtures = invenio_geographic_identifiers.fixtures.tasks"
-        ]
         # 'invenio_access.actions': [],
         # 'invenio_admin.actions': [],
         # 'invenio_assets.bundles': [],

@@ -22,6 +22,9 @@
     "name": {
       "description": "Human readable label.",
       "type": "string"
+    },
+    "location": {
+      "type": "string"
     }
   }
 }

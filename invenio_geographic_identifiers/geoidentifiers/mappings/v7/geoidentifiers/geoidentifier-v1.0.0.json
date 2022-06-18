@@ -39,6 +39,9 @@
       "name_sort": {
         "type": "keyword"
       },
+      "location": {
+        "type": "geo_point"
+      },
       "pid": {
         "type": "object",
         "properties": {

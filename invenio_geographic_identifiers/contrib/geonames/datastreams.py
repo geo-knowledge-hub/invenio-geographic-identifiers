@@ -8,16 +8,10 @@
 
 """Geographic Identifiers datastreams."""
 
+from invenio_access.permissions import system_identity
+
 from invenio_vocabularies.datastreams.writers import ServiceWriter
 from invenio_vocabularies.datastreams.transformers import BaseTransformer
-
-
-class GeoNamesServiceWriter(ServiceWriter):
-    """GeoNames service writer."""
-
-    def _entry_id(self, entry):
-        return entry['id']
-
 
 class GeoNamesTransformer(BaseTransformer):
     """Transforms a GeoNames record into an Invenio GeoNames record."""
@@ -27,7 +21,7 @@ class GeoNamesTransformer(BaseTransformer):
 
         stream_entry.entry = {
             "id": f"geonames::{stream_entry.entry['geonameid']}",
-            "scheme": "GEONAMES",
+            "scheme": "GeoNames",
             "name": (
                 stream_entry.entry.get("asciiname") or
                 stream_entry.entry.get("name") or
@@ -37,6 +31,15 @@ class GeoNamesTransformer(BaseTransformer):
 
         return stream_entry
 
+#
+# Writers
+#
+class GeoNamesServiceWriter(ServiceWriter):
+    """GeoNames service writer."""
+
+    def _entry_id(self, entry):
+        return entry['id']
+
 
 GEOGRAPHIC_IDENTIFIERS_DATASTREAM_TRANSFORMERS = {
     "geonames-transformer": GeoNamesTransformer,
@@ -44,4 +47,35 @@ GEOGRAPHIC_IDENTIFIERS_DATASTREAM_TRANSFORMERS = {
 
 GEOGRAPHIC_DATASTREAM_WRITERS = {
     "geonames-service": GeoNamesServiceWriter
+}
+
+DATASTREAM_CONFIG = {
+    "readers": [
+        {"type": "zip"},
+        {
+            "type": "csv", 
+            "args": {
+                "csv_options": {
+                    "fieldnames": [
+                        "geonameid", "name", "asciiname", "alternatenames",
+                        "latitude", "longitude", "feature_class", "feature_code",
+                        "country_code", "cc2", "admin1_code", "admin2_code",
+                        "admin3_code", "admin4_code", "population", "elevation",
+                        "dem", "timezone", "modification_date"
+                    ],
+                    "delimiter": "\t"
+                }
+            }
+        },
+    ],
+    "transformers": [{"type": "geonames-transformer"}],
+    "writers": [
+        {
+            "type": "geonames-service",
+            "args": {
+                "service_or_name": "names",
+                "identity": system_identity,
+            },
+        }
+    ],
 }

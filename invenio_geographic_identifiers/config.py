@@ -7,12 +7,3 @@
 # more details.
 
 """Geographic identifiers vocabulary for the InvenioRDM"""
-
-# TODO: This is an example file. Remove it if your package does not use any
-# extra configuration variables.
-
-INVENIO_GEOGRAPHIC_IDENTIFIERS_DEFAULT_VALUE = 'foobar'
-"""Default value for the application."""
-
-INVENIO_GEOGRAPHIC_IDENTIFIERS_BASE_TEMPLATE = 'invenio_geographic_identifiers/base.html'
-"""Default base template for the demo page."""
