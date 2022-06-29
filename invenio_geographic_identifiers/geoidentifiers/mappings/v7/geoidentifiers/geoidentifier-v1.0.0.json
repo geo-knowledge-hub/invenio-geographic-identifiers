@@ -39,8 +39,12 @@
       "name_sort": {
         "type": "keyword"
       },
-      "location": {
-        "type": "geo_point"
+      "locations": {
+        "properties": {
+          "geometry": {
+            "type": "geo_shape"
+          }
+        }
       },
       "pid": {
         "type": "object",

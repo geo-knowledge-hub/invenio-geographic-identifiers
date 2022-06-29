@@ -12,34 +12,40 @@ from copy import deepcopy
 
 import click
 import yaml
+
 from flask.cli import with_appcontext
 from invenio_access.permissions import system_identity
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
 from invenio_records_resources.proxies import current_service_registry
 from invenio_vocabularies.datastreams import DataStreamFactory
 
+from .contrib.regions.datastreams import DATASTREAM_CONFIG as regions_ds_config
 from .contrib.geonames.datastreams import DATASTREAM_CONFIG as geonames_ds_config
 
 
 def get_service_for_vocabulary(vocabulary):
     """Generate the DataStream service."""
-    if vocabulary == "geoidentifiers":
-        return current_service_registry.get("geoidentifiers")
+    return current_service_registry.get("geoidentifiers")
 
 
 def get_config_for_ds(vocabulary, filepath=None, origin=None):
     """Generate the DataStream configuration."""
-    if vocabulary == "geoidentifiers":
+    config = None
+
+    if vocabulary == "geonames":
         config = deepcopy(geonames_ds_config)
+    elif vocabulary == "regions":
+        config = deepcopy(regions_ds_config)
+    else:
+        raise ValueError("Invalid vocabulary type")
 
-        if filepath:
-            with open(filepath) as f:
-                config = yaml.safe_load(f).get(vocabulary)
+    if filepath:
+        with open(filepath) as f:
+            config = yaml.safe_load(f).get(vocabulary)
+    if origin:
+        config["reader"]["args"]["origin"] = origin
 
-        if origin:
-            config["readers"][0]["args"]["origin"] = origin
-
-        return config
+    return config
 
 
 @click.group()
@@ -50,17 +56,15 @@ def geoidentifiers():
 def _process_vocab(config, num_samples=None):
     """Import a vocabulary."""
     ds = DataStreamFactory.create(
-        readers_config=config["readers"],
+        reader_config=config["reader"],
         transformers_config=config.get("transformers"),
         writers_config=config["writers"],
     )
 
-    success, errored, filtered = 0, 0, 0
+    success, errored = 0, 0
     left = num_samples or -1
     for result in ds.process():
         left = left - 1
-        if result.filtered:
-            filtered += 1
         if result.errors:
             for err in result.errors:
                 click.secho(err, fg="red")
@@ -70,10 +74,10 @@ def _process_vocab(config, num_samples=None):
         if left == 0:
             click.secho(f"Number of samples reached {num_samples}", fg="green")
             break
-    return success, errored,
+    return success, errored
 
 
-def _output_process(vocabulary, op, success, errored, filtered):
+def _output_process(vocabulary, op, success, errored):
     """Outputs the result of an operation."""
     total = success + errored
 
@@ -83,12 +87,9 @@ def _output_process(vocabulary, op, success, errored, filtered):
 
     click.secho(
         f"Vocabulary {vocabulary} {op}. Total items {total}. \n"
-        f"{success} items succeeded\n"
-        f"{errored} contained errors\n"
-        f"{filtered} were filtered.",
-        fg=color,
+        f"{success} items succeeded, {errored} contained errors.",
+        fg=color
     )
-
 
 @geoidentifiers.command(name="import")
 @click.option("-v", "--vocabulary", type=click.STRING, required=True)
@@ -99,13 +100,13 @@ def _output_process(vocabulary, op, success, errored, filtered):
 def import_vocab(vocabulary, filepath=None, origin=None, num_samples=None):
     """Import a vocabulary."""
     if not filepath and not origin:
-        click.secho("One of --filepath or --origin must be present.", fg="red")
+        click.secho("One of --filepath or --origin must be present", fg="red")
         exit(1)
 
     config = get_config_for_ds(vocabulary, filepath, origin)
-    success, errored, filtered = _process_vocab(config, num_samples)
+    success, errored = _process_vocab(config, num_samples)
 
-    _output_process(vocabulary, "imported", success, errored, filtered)
+    _output_process(vocabulary, "imported", success, errored)
 
 
 @geoidentifiers.command()
@@ -116,7 +117,7 @@ def import_vocab(vocabulary, filepath=None, origin=None, num_samples=None):
 def update(vocabulary, filepath=None, origin=None):
     """Import a vocabulary."""
     if not filepath and not origin:
-        click.secho("One of --filepath or --origin must be present.", fg="red")
+        click.secho("One of --filepath or --origin must be present", fg="red")
         exit(1)
 
     config = get_config_for_ds(vocabulary, filepath, origin)
@@ -124,9 +125,9 @@ def update(vocabulary, filepath=None, origin=None):
     for w_conf in config["writers"]:
         w_conf["args"]["update"] = True
 
-    success, errored, filtered = _process_vocab(config)
+    success, errored = _process_vocab(config)
 
-    _output_process(vocabulary, "updated", success, errored, filtered)
+    _output_process(vocabulary, "updated", success, errored)
 
 
 @geoidentifiers.command()
@@ -140,15 +141,21 @@ def update(vocabulary, filepath=None, origin=None):
 @click.option("--all", is_flag=True, default=False, help="Not supported yet.")
 @with_appcontext
 def delete(vocabulary, identifier, all):
-    """Delete all items or a specific one of the GeoIdentifiers vocabulary."""
+    """Delete all items or a specific one of the vocabulary."""
     if not id and not all:
-        click.secho("An identifier or the --all flag must be present.", fg="red")
+        click.secho(
+            "An identifier or the --all flag must be present.",
+            fg="red"
+        )
         exit(1)
 
     service = get_service_for_vocabulary(vocabulary)
     if identifier:
         try:
             if service.delete(identifier, system_identity):
-                click.secho(f"{identifier} deleted from {vocabulary}.", fg="green")
+                click.secho(
+                    f"{identifier} deleted from {vocabulary}.",
+                    fg="green"
+                )
         except (PIDDeletedError, PIDDoesNotExistError):
             click.secho(f"PID {identifier} not found.")

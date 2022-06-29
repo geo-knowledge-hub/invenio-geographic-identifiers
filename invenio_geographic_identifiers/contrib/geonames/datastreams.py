@@ -8,33 +8,12 @@
 
 """Geographic Identifiers datastreams."""
 
-import csv
-import io
-
 from invenio_access.permissions import system_identity
-from invenio_vocabularies.datastreams.readers import CSVReader
 
 from invenio_vocabularies.datastreams.writers import ServiceWriter
 from invenio_vocabularies.datastreams.transformers import BaseTransformer
 
-
-#
-# Readers
-#
-class GeoNamesCSVBytesReader(CSVReader):
-    """Read the CSV Bytes from the GeoNames raw data."""
-
-    def _iter(self, fp, *args, **kwargs):
-        """Reads a csv file and returns a dictionary per element."""
-        csvfile = fp
-        if not isinstance(fp, io.TextIOBase):
-            csvfile = io.TextIOWrapper(fp)
-        if self.as_dict:
-            reader = csv.DictReader(csvfile, **self.csv_options)
-        else:
-            reader = csv.reader(csvfile, **self.csv_options)
-        for row in reader:
-            yield row
+from ...datastreams.readers import ZippedCSVReader
 
 
 #
@@ -79,31 +58,25 @@ VOCABULARIES_DATASTREAM_WRITERS = {
 }
 
 VOCABULARIES_DATASTREAM_READERS = {
-    "geonames-csv-reader": GeoNamesCSVBytesReader
+    "geonames-reader": ZippedCSVReader
 }
 
 DATASTREAM_CONFIG = {
-    "readers": [
-        {
-            "type": "zip",
-            "args": {}
-        },
-        {
-            "type": "geonames-csv-reader",
-            "args": {
-                "csv_options": {
-                    "fieldnames": [
-                        "geonameid", "name", "asciiname", "alternatenames",
-                        "latitude", "longitude", "feature_class", "feature_code",
-                        "country_code", "cc2", "admin1_code", "admin2_code",
-                        "admin3_code", "admin4_code", "population", "elevation",
-                        "dem", "timezone", "modification_date"
-                    ],
-                    "delimiter": "\t"
-                }
+    "reader": {
+        "type": "geonames-reader",
+        "args": {
+            "csv_options": {
+                "fieldnames": [
+                    "geonameid", "name", "asciiname", "alternatenames",
+                    "latitude", "longitude", "feature_class", "feature_code",
+                    "country_code", "cc2", "admin1_code", "admin2_code",
+                    "admin3_code", "admin4_code", "population", "elevation",
+                    "dem", "timezone", "modification_date"
+                ],
+                "delimiter": "\t"
             }
-        },
-    ],
+        }
+    },
     "transformers": [{"type": "geonames-transformer"}],
     "writers": [
         {

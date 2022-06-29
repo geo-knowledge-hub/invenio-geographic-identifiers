@@ -8,9 +8,50 @@
 
 """Geographic Identifiers schema."""
 
+from geojson import MultiPolygon
+
+from marshmallow import Schema, fields
+from marshmallow.fields import Constant, Float, List
+
+from marshmallow_utils import schemas as base_schemas
+from marshmallow_utils.schemas.geojson import GeometryValidator
+
 from marshmallow_utils.fields import SanitizedUnicode
 
 from invenio_vocabularies.services.schema import BaseVocabularySchema
+
+
+#
+# Geometries
+#
+class MultiPolygonSchema(Schema):
+    """GeoJSON MultiPolygon schema.
+
+    See https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.7
+    """
+    coordinates = List(
+        List(List(List(Float))), required=True, validate=GeometryValidator(MultiPolygon))
+    type = Constant('MultiPolygon')
+
+
+class GeometryObjectSchema(base_schemas.GeometryObjectSchema):
+    """A GeoJSON Geometry Object schema.
+
+    See https://tools.ietf.org/html/rfc7946#section-3.1
+    """
+
+    type_schemas = {
+        "Point": base_schemas.PointSchema,
+        "MultiPoint": base_schemas.MultiPointSchema,
+        "Polygon": base_schemas.PolygonSchema,
+        "MultiPolygon": MultiPolygonSchema
+    }
+
+
+class LocationSchema(Schema):
+    """Location schema."""
+
+    geometry = fields.Nested(GeometryObjectSchema)
 
 
 class GeographicIdentifiersSchema(BaseVocabularySchema):
@@ -21,4 +62,4 @@ class GeographicIdentifiersSchema(BaseVocabularySchema):
     id = SanitizedUnicode(required=True)
     scheme = SanitizedUnicode(required=True)
     name = SanitizedUnicode(required=True)
-    location = SanitizedUnicode(required=True)
+    locations = fields.List(required=True, cls_or_instance=fields.Nested(LocationSchema))
