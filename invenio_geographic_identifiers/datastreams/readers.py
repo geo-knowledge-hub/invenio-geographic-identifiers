@@ -11,9 +11,7 @@
 import io
 import csv
 import zipfile
-import shapefile
 
-from invenio_vocabularies.datastreams.errors import ReaderError
 from invenio_vocabularies.datastreams.readers import BaseReader
 from invenio_vocabularies.datastreams.datastreams import StreamEntry
 
@@ -48,39 +46,3 @@ class ZippedCSVReader(BaseReader):
         else:
             with zipfile.ZipFile(self._origin, **self.zip_options) as archive:
                 yield from self._iter(fp=archive, *args, **kwargs)
-
-
-class ShapefileReader(BaseReader):
-
-    def __init__(self, origin=None, mode="r", record_validator=None, *args, **kwargs):
-        self._origin = origin
-        self._mode = mode
-        self._record_validator = record_validator
-
-        if self._record_validator and not callable(self._record_validator):
-            raise ReaderError("`Record Validator` must be callable.")
-
-        super(ShapefileReader, self).__init__(origin, mode, *args, **kwargs)
-
-    def _iter(self, fp, *args, **kwargs):
-        """Reads a shapefile file and returns a dictionary per element."""
-        iterator = fp
-        if isinstance(fp, shapefile.Reader):
-            iterator = fp.iterShapeRecords()
-
-        for shape_record in iterator:
-            is_record_valid = True
-
-            if self._record_validator:
-                is_record_valid = self._record_validator(shape_record)
-
-            if is_record_valid:
-                yield StreamEntry(shape_record)
-
-    def read(self, item=None, *args, **kwargs):
-        """Reads from iter or opens the file descriptor from origin."""
-        if item:
-            yield from self._iter(fp=item, *args, **kwargs)
-        else:
-            with shapefile.Reader(self._origin, self._mode) as shp:
-                yield from self._iter(fp=shp, *args, **kwargs)

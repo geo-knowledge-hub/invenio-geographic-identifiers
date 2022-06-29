@@ -19,7 +19,6 @@ from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
 from invenio_records_resources.proxies import current_service_registry
 from invenio_vocabularies.datastreams import DataStreamFactory
 
-from .contrib.regions.datastreams import DATASTREAM_CONFIG as regions_ds_config
 from .contrib.geonames.datastreams import DATASTREAM_CONFIG as geonames_ds_config
 
 
@@ -34,8 +33,6 @@ def get_config_for_ds(vocabulary, filepath=None, origin=None):
 
     if vocabulary == "geonames":
         config = deepcopy(geonames_ds_config)
-    elif vocabulary == "regions":
-        config = deepcopy(regions_ds_config)
     else:
         raise ValueError("Invalid vocabulary type")
 

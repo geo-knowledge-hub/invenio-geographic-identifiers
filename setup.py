@@ -54,8 +54,7 @@ setup_requires = [
 
 install_requires = [
     "invenio-i18n>=1.2.0",
-    "invenio-vocabularies>=0.10.3,<0.11.0",
-    "pyshp>=2.3.0"
+    "invenio-vocabularies>=0.10.3,<0.11.0"
 ]
 
 packages = find_packages()
