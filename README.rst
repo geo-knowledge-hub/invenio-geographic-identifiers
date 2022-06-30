@@ -6,7 +6,7 @@
     for more details.
 
 ================================
- invenio-geographic-identifiers
+ Invenio-Geographic-Identifiers
 ================================
 
 .. image:: https://github.com/geo-knowledge-hub/invenio-geographic-identifiers/workflows/CI/badge.svg
