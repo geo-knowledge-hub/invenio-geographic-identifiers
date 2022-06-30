@@ -63,3 +63,9 @@ target/
 
 # Vim swapfiles
 .*.sw?
+
+# pyenv
+.python-version
+
+# IDEs
+.vscode/
