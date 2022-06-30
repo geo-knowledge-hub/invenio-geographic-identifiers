@@ -6,9 +6,9 @@
 # and/or modify it under the terms of the MIT License; see LICENSE file for
 # more details.
 
-"""Geographic identifiers vocabulary for the InvenioRDM"""
+"""Geographic identifiers vocabulary for the InvenioRDM."""
 
 from .ext import InvenioGeographicIdentifiers
-from .version import __version__
 
-__all__ = ('__version__', 'InvenioGeographicIdentifiers')
+__version__ = "0.1.0"
+__all__ = ("__version__", "InvenioGeographicIdentifiers")

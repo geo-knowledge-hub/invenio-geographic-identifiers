@@ -6,14 +6,14 @@
 # and/or modify it under the terms of the MIT License; see LICENSE file for
 # more details.
 
-"""Geographic Identifiers vocabulary for the InvenioRDM"""
+"""Geographic Identifiers vocabulary for the InvenioRDM."""
 
 from . import config
 from .geoidentifiers import (
     GeographicIdentifiersResource,
     GeographicIdentifiersResourceConfig,
     GeographicIdentifiersService,
-    GeographicIdentifiersServiceConfig
+    GeographicIdentifiersServiceConfig,
 )
 
 
@@ -31,17 +31,16 @@ class InvenioGeographicIdentifiers(object):
         self.init_service(app)
         self.init_resource(app)
 
-        app.extensions['invenio-geographic-identifiers'] = self
+        app.extensions["invenio-geographic-identifiers"] = self
 
     def init_config(self, app):
         """Initialize configuration."""
         for k in dir(config):
-            if k.startswith('INVENIO_GEOGRAPHIC_IDENTIFIERS_'):
+            if k.startswith("INVENIO_GEOGRAPHIC_IDENTIFIERS_"):
                 app.config.setdefault(k, getattr(config, k))
 
     def service_configs(self, app):
         """Customized service configs."""
-
         # following the `invenio-*-resources pattern`. This make easier
         # future configuration extensions.
         class ServiceConfig:
@@ -62,5 +61,5 @@ class InvenioGeographicIdentifiers(object):
         """Initialize resources."""
         self.geoidentifiers_resource = GeographicIdentifiersResource(
             service=self.geoidentifiers_service,
-            config=GeographicIdentifiersResourceConfig
+            config=GeographicIdentifiersResourceConfig,
         )

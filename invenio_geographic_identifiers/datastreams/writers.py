@@ -15,4 +15,4 @@ class GeoIdentifierServiceWriter(ServiceWriter):
     """Geographic Identifier ServiceWriter class."""
 
     def _entry_id(self, entry):
-        return entry['id']
+        return entry["id"]

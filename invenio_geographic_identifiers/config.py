@@ -6,4 +6,4 @@
 # and/or modify it under the terms of the MIT License; see LICENSE file for
 # more details.
 
-"""Geographic identifiers vocabulary for the InvenioRDM"""
+"""Geographic identifiers vocabulary for the InvenioRDM."""

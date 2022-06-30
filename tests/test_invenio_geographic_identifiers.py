@@ -30,10 +30,3 @@ def test_init():
     assert 'invenio-geographic-identifiers' not in app.extensions
     ext.init_app(app)
     assert 'invenio-geographic-identifiers' in app.extensions
-
-
-def test_view(base_client):
-    """Test view."""
-    res = base_client.get("/")
-    assert res.status_code == 200
-    assert 'Welcome to invenio-geographic-identifiers' in str(res.data)

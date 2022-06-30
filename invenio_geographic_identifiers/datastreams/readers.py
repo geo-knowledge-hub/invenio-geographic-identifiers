@@ -8,18 +8,20 @@
 
 """Datastreams readers."""
 
-import io
 import csv
+import io
 import zipfile
 
-from invenio_vocabularies.datastreams.readers import BaseReader
 from invenio_vocabularies.datastreams.datastreams import StreamEntry
+from invenio_vocabularies.datastreams.readers import BaseReader
 
 
 class ZippedCSVReader(BaseReader):
-    """Read a CSV data from a zip file."""
+    """Read `csv` files stored in a `zip` file."""
 
-    def __init__(self, *args, csv_options=None, zip_options=None, as_dict=True, **kwargs):
+    def __init__(
+        self, *args, csv_options=None, zip_options=None, as_dict=True, **kwargs
+    ):
         """Constructor."""
         self.csv_options = csv_options or {}
         self.zip_options = zip_options or {}
@@ -28,18 +30,21 @@ class ZippedCSVReader(BaseReader):
 
     def _iter(self, fp, *args, **kwargs):
         """Reads a csv file and returns a dictionary per element."""
-        csvfile = fp
-        if not isinstance(fp, io.TextIOBase):
-            csvfile = io.TextIOWrapper(fp)
-        if self.as_dict:
-            reader = csv.DictReader(csvfile, **self.csv_options)
-        else:
-            reader = csv.reader(csvfile, **self.csv_options)
-        for row in reader:
-            yield StreamEntry(row)
+        for member in fp.infolist():
+            if not member.is_dir():
+                csvfile = fp.open(member)
+
+                if not isinstance(csvfile, io.TextIOBase):
+                    csvfile = io.TextIOWrapper(csvfile)
+                if self.as_dict:
+                    reader = csv.DictReader(csvfile, **self.csv_options)
+                else:
+                    reader = csv.reader(csvfile, **self.csv_options)
+                for row in reader:
+                    yield StreamEntry(row)
 
     def read(self, item=None, *args, **kwargs):
-        """Opens a Zip archive or uses the given file pointer."""
+        """Opens a `zip` archive or uses the given file pointer."""
         # https://docs.python.org/3/library/zipfile.html
         if item:
             yield from self._iter(fp=item, *args, **kwargs)

@@ -11,7 +11,6 @@
 from invenio_records.dumpers import ElasticsearchDumper
 from invenio_records.dumpers.indexedat import IndexedAtDumperExt
 from invenio_records_resources.factories.factory import RecordTypeFactory
-
 from invenio_vocabularies.records.pidprovider import PIDProviderFactory
 from invenio_vocabularies.records.systemfields import BaseVocabularyPIDFieldContext
 from invenio_vocabularies.services.permissions import PermissionPolicy
@@ -25,7 +24,7 @@ record_type = RecordTypeFactory(
     pid_field_kwargs={
         "create": False,
         "provider": PIDProviderFactory.create(pid_type="geoid"),
-        "context_cls": BaseVocabularyPIDFieldContext
+        "context_cls": BaseVocabularyPIDFieldContext,
     },
     schema_version="1.0.0",
     schema_path="local://geoidentifiers/geoidentifier-v1.0.0.json",
@@ -40,5 +39,5 @@ record_type = RecordTypeFactory(
     service_components=service_components,
     permission_policy_cls=PermissionPolicy,
     # Resource Layer
-    endpoint_route="/geoidentifiers"
+    endpoint_route="/geoidentifiers",
 )

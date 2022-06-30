@@ -13,9 +13,9 @@ class GeographicIdentifiersLabels:
     """Fetching of Geographic identifiers labels for facets.
 
     Note:
-        This class was imported from ``invenio-vocabularies (subject). We don't change
-        anything because the same "human-readable" values are valid for the
-        geographic identifiers.```
+        This class was imported from ``invenio-vocabularies``` (subject).
+        We don't change anything because the same "human-readable" values
+        are valid for the geographic identifiers.
     """
 
     def __call__(self, ids):

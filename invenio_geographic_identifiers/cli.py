@@ -12,7 +12,6 @@ from copy import deepcopy
 
 import click
 import yaml
-
 from flask.cli import with_appcontext
 from invenio_access.permissions import system_identity
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
@@ -47,7 +46,7 @@ def get_config_for_ds(vocabulary, filepath=None, origin=None):
 
 @click.group()
 def geoidentifiers():
-    """GeoIdentifiers command."""
+    """Geoidentifiers command."""
 
 
 def _process_vocab(config, num_samples=None):
@@ -85,8 +84,9 @@ def _output_process(vocabulary, op, success, errored):
     click.secho(
         f"Vocabulary {vocabulary} {op}. Total items {total}. \n"
         f"{success} items succeeded, {errored} contained errors.",
-        fg=color
+        fg=color,
     )
+
 
 @geoidentifiers.command(name="import")
 @click.option("-v", "--vocabulary", type=click.STRING, required=True)
@@ -140,19 +140,15 @@ def update(vocabulary, filepath=None, origin=None):
 def delete(vocabulary, identifier, all):
     """Delete all items or a specific one of the vocabulary."""
     if not id and not all:
-        click.secho(
-            "An identifier or the --all flag must be present.",
-            fg="red"
-        )
+        click.secho("An identifier or the --all flag "
+                    "must be present.", fg="red")
         exit(1)
 
     service = get_service_for_vocabulary(vocabulary)
     if identifier:
         try:
             if service.delete(identifier, system_identity):
-                click.secho(
-                    f"{identifier} deleted from {vocabulary}.",
-                    fg="green"
-                )
+                click.secho(f"{identifier} deleted "
+                            f"from {vocabulary}.", fg="green")
         except (PIDDeletedError, PIDDoesNotExistError):
             click.secho(f"PID {identifier} not found.")

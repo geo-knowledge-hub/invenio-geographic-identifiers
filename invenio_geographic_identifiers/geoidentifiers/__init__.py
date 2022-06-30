@@ -6,10 +6,13 @@
 # and/or modify it under the terms of the MIT License; see LICENSE file for
 # more details.
 
-"""Geographic Identifiers module."""
+"""Elasticsearch mappings for Invenio Geographic Identifiers."""
 
 from .facets import GeographicIdentifiersLabels
-from .resources import GeographicIdentifiersResource, GeographicIdentifiersResourceConfig
+from .resources import (
+    GeographicIdentifiersResource,
+    GeographicIdentifiersResourceConfig,
+)
 from .services import GeographicIdentifiersService, GeographicIdentifiersServiceConfig
 
 __all__ = (
@@ -17,5 +20,5 @@ __all__ = (
     "GeographicIdentifiersResource",
     "GeographicIdentifiersResourceConfig",
     "GeographicIdentifiersService",
-    "GeographicIdentifiersServiceConfig"
+    "GeographicIdentifiersServiceConfig",
 )

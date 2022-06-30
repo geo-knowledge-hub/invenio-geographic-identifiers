@@ -11,7 +11,6 @@
 from flask_babelex import lazy_gettext as _
 from invenio_records_resources.services import SearchOptions
 from invenio_records_resources.services.records.components import DataComponent
-
 from invenio_vocabularies.services.components import PIDComponent
 from invenio_vocabularies.services.querystr import FilteredSuggestQueryParser
 
