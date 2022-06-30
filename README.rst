@@ -29,7 +29,7 @@
         :target: https://discord.com/channels/730739436551143514#
         :alt: Join us at Discord
 
-Geographic identifiers vocabulary for the InvenioRDM.
+Geographic identifiers vocabularies for the InvenioRDM.
 
 Development
 ===========
