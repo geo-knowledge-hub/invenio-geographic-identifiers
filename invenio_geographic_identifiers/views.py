@@ -21,12 +21,10 @@ def init(state):
     # Invenio-Records-Resources might not have been initialized.
     sregistry = app.extensions["invenio-records-resources"].registry
     ext = app.extensions["invenio-geographic-identifiers"]
-    sregistry.register(ext.geoidentifiers_service,
-                       service_id="geoidentifiers")
+    sregistry.register(ext.geoidentifiers_service, service_id="geoidentifiers")
     # Register indexers
     iregistry = app.extensions["invenio-indexer"].registry
-    iregistry.register(ext.geoidentifiers_service.indexer,
-                       indexer_id="geoidentifiers")
+    iregistry.register(ext.geoidentifiers_service.indexer, indexer_id="geoidentifiers")
 
 
 def create_geoidentifiers_blueprint_from_app(app):

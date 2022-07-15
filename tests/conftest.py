@@ -6,40 +6,40 @@
 # and/or modify it under the terms of the MIT License; see LICENSE file for
 # more details.
 
-"""Pytest configuration.
-
-See https://pytest-invenio.readthedocs.io/ for documentation on which test
-fixtures are available.
-"""
-
-import shutil
-import tempfile
+"""Pytest configuration."""
 
 import pytest
-from flask import Flask
-from flask_babelex import Babel
-
-from invenio_geographic_identifiers import InvenioGeographicIdentifiers
-from invenio_geographic_identifiers.views import blueprint
+from invenio_app.factory import create_api
 
 
-@pytest.fixture(scope='module')
-def celery_config():
-    """Override pytest-invenio fixture.
+#
+# Application
+#
+@pytest.fixture(scope="module")
+def app_config(app_config):
+    """Override pytest-invenio app_config fixture."""
+    app_config[
+        "RECORDS_REFRESOLVER_CLS"
+    ] = "invenio_records.resolver.InvenioRefResolver"
+    app_config[
+        "RECORDS_REFRESOLVER_STORE"
+    ] = "invenio_jsonschemas.proxies.current_refresolver_store"
+    # Variable not used. We set it to silent warnings
+    app_config["JSONSCHEMAS_HOST"] = "not-used"
 
-    TODO: Remove this fixture if you add Celery support.
-    """
-    return {}
+    return app_config
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def create_app(instance_path):
     """Application factory fixture."""
-    def factory(**config):
-        app = Flask('testapp', instance_path=instance_path)
-        app.config.update(**config)
-        Babel(app)
-        InvenioGeographicIdentifiers(app)
-        app.register_blueprint(blueprint)
-        return app
-    return factory
+    return create_api
+
+
+@pytest.fixture()
+def headers():
+    """Default headers for making requests."""
+    return {
+        "content-type": "application/json",
+        "accept": "application/json",
+    }
