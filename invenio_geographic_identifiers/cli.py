@@ -140,15 +140,13 @@ def update(vocabulary, filepath=None, origin=None):
 def delete(vocabulary, identifier, all):
     """Delete all items or a specific one of the vocabulary."""
     if not id and not all:
-        click.secho("An identifier or the --all flag "
-                    "must be present.", fg="red")
+        click.secho("An identifier or the --all flag " "must be present.", fg="red")
         exit(1)
 
     service = get_service_for_vocabulary(vocabulary)
     if identifier:
         try:
             if service.delete(identifier, system_identity):
-                click.secho(f"{identifier} deleted "
-                            f"from {vocabulary}.", fg="green")
+                click.secho(f"{identifier} deleted " f"from {vocabulary}.", fg="green")
         except (PIDDeletedError, PIDDoesNotExistError):
             click.secho(f"PID {identifier} not found.")

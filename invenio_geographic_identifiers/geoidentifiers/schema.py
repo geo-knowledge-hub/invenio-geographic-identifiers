@@ -27,9 +27,7 @@ class MultiPolygonSchema(Schema):
     """
 
     coordinates = List(
-        List(List(List(Float))),
-        required=True,
-        validate=GeometryValidator(MultiPolygon)
+        List(List(List(Float))), required=True, validate=GeometryValidator(MultiPolygon)
     )
     type = Constant("MultiPolygon")
 
@@ -63,6 +61,5 @@ class GeographicIdentifiersSchema(BaseVocabularySchema):
     scheme = SanitizedUnicode(required=True)
     name = SanitizedUnicode(required=True)
     locations = fields.List(
-        required=True,
-        cls_or_instance=fields.Nested(LocationSchema)
+        required=True, cls_or_instance=fields.Nested(LocationSchema)
     )
