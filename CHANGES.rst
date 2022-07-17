@@ -8,6 +8,19 @@
 Changes
 =======
 
-Version 0.1.0 (released TBD)
+Version 0.1.0 (2022-07-17)
+--------------------------
 
-- Initial public release.
+- Initial implementation of the Geographic Identifiers vocabularies for the InvenioRDM;
+- DataStreams API
+
+  - Readers/Writers/Transformers to handle geographic datasets.
+  
+- Supported Identifier schemes (Contrib module)
+
+  - `Geonames <https://www.geonames.org/>`_
+
+- Implementation spec
+
+  - Support for InvenioRDM 8.0;
+  - Based on `Invenio Vocabularies <https://github.com/inveniosoftware/invenio-vocabularies>`_ module.
