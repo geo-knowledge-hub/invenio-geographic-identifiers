@@ -6,6 +6,8 @@
 # and/or modify it under the terms of the MIT License; see LICENSE file for
 # more details.
 
+"""Invenio Geographic Identifiers proxies."""
+
 from flask import current_app
 from werkzeug.local import LocalProxy
 
