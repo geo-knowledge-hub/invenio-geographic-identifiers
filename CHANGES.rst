@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 0.1.1 (2022-07-19)
+--------------------------
+
+- Fixed scheme name (Replaced ``GeoNames`` to ``geonames``) to be compatible with ``RDM_RECORDS_LOCATION_SCHEMES`` (Invenio RDM Records)
+
 Version 0.1.0 (2022-07-17)
 --------------------------
 

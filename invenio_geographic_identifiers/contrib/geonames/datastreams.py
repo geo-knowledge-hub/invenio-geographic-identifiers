@@ -25,7 +25,7 @@ class GeoNamesTransformer(BaseTransformer):
         """Applies the transformation to the entry."""
         stream_entry.entry = {
             "id": f"geonames::{stream_entry.entry['geonameid']}",
-            "scheme": "GeoNames",
+            "scheme": "geonames",
             "name": (
                 stream_entry.entry.get("asciiname")
                 or stream_entry.entry.get("name")
