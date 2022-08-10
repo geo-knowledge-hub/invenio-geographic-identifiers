@@ -8,6 +8,16 @@
 Changes
 =======
 
+Version 0.2.0 (2022-08-10)
+--------------------------
+
+- Updated Invenio vocabularies
+
+  - Support for InvenioRDM 9.0;
+  - Updated ``ZippedCSVReader`` with the new DataStream API features;
+  - Updated ``GeoNames`` DataStream configuration to support multiple readers.
+
+
 Version 0.1.1 (2022-07-19)
 --------------------------
 
@@ -20,7 +30,7 @@ Version 0.1.0 (2022-07-17)
 - DataStreams API
 
   - Readers/Writers/Transformers to handle geographic datasets.
-  
+
 - Supported Identifier schemes (Contrib module)
 
   - `Geonames <https://www.geonames.org/>`_
