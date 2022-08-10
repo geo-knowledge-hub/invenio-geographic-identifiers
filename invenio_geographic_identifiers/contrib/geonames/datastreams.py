@@ -66,35 +66,37 @@ VOCABULARIES_DATASTREAM_WRITERS = {"geonames-service": GeoNamesServiceWriter}
 VOCABULARIES_DATASTREAM_READERS = {"geonames-reader": ZippedCSVReader}
 
 DATASTREAM_CONFIG = {
-    "reader": {
-        "type": "geonames-reader",
-        "args": {
-            "csv_options": {
-                "fieldnames": [
-                    "geonameid",
-                    "name",
-                    "asciiname",
-                    "alternatenames",
-                    "latitude",
-                    "longitude",
-                    "feature_class",
-                    "feature_code",
-                    "country_code",
-                    "cc2",
-                    "admin1_code",
-                    "admin2_code",
-                    "admin3_code",
-                    "admin4_code",
-                    "population",
-                    "elevation",
-                    "dem",
-                    "timezone",
-                    "modification_date",
-                ],
-                "delimiter": "\t",
-            }
-        },
-    },
+    "readers": [
+        {
+            "type": "geonames-reader",
+            "args": {
+                "csv_options": {
+                    "fieldnames": [
+                        "geonameid",
+                        "name",
+                        "asciiname",
+                        "alternatenames",
+                        "latitude",
+                        "longitude",
+                        "feature_class",
+                        "feature_code",
+                        "country_code",
+                        "cc2",
+                        "admin1_code",
+                        "admin2_code",
+                        "admin3_code",
+                        "admin4_code",
+                        "population",
+                        "elevation",
+                        "dem",
+                        "timezone",
+                        "modification_date",
+                    ],
+                    "delimiter": "\t",
+                }
+            },
+        }
+    ],
     "transformers": [{"type": "geonames-transformer"}],
     "writers": [
         {

@@ -16,17 +16,18 @@ from invenio_geographic_identifiers import InvenioGeographicIdentifiers
 def test_version():
     """Test version import."""
     from invenio_geographic_identifiers import __version__
+
     assert __version__
 
 
 def test_init():
     """Test extension initialization."""
-    app = Flask('testapp')
+    app = Flask("testapp")
     ext = InvenioGeographicIdentifiers(app)
-    assert 'invenio-geographic-identifiers' in app.extensions
+    assert "invenio-geographic-identifiers" in app.extensions
 
-    app = Flask('testapp')
+    app = Flask("testapp")
     ext = InvenioGeographicIdentifiers()
-    assert 'invenio-geographic-identifiers' not in app.extensions
+    assert "invenio-geographic-identifiers" not in app.extensions
     ext.init_app(app)
-    assert 'invenio-geographic-identifiers' in app.extensions
+    assert "invenio-geographic-identifiers" in app.extensions

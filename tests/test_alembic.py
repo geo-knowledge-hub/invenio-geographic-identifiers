@@ -1,4 +1,3 @@
-
 import pytest
 from invenio_db.utils import drop_alembic_version_table
 
@@ -46,4 +45,3 @@ def test_alembic(base_app, database):
 
     # Cleanup
     drop_alembic_version_table()
-
