@@ -12,7 +12,6 @@ import csv
 import io
 import zipfile
 
-from invenio_vocabularies.datastreams.datastreams import StreamEntry
 from invenio_vocabularies.datastreams.readers import BaseReader
 
 
@@ -41,7 +40,7 @@ class ZippedCSVReader(BaseReader):
                 else:
                     reader = csv.reader(csvfile, **self.csv_options)
                 for row in reader:
-                    yield StreamEntry(row)
+                    yield row
 
     def read(self, item=None, *args, **kwargs):
         """Opens a `zip` archive or uses the given file pointer."""
