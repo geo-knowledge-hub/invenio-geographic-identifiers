@@ -43,6 +43,7 @@ class InvenioGeographicIdentifiers(object):
         """Customized service configs."""
         # following the `invenio-*-resources pattern`. This make easier
         # future configuration extensions.
+
         class ServiceConfig:
             geoidentifiers = GeographicIdentifiersServiceConfig
 
