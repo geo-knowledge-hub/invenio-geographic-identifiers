@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
-        requirements-level: [dev]  # current scenario for the GEO Knowledge Hub
-        db-service: [postgresql12]
-        search-service: [opensearch2]
-        include:
-          - db-service: postgresql12
+          python-version: [3.7, 3.8, 3.9]
+          requirements-level: [dev]  # current scenario for the GEO Knowledge Hub
+          db-service: [postgresql13]
+          search-service: [opensearch2]
+          include:
+          - db-service: postgresql13
             DB_EXTRAS: "postgresql"
 
           - search-service: opensearch2
@@ -34,7 +34,7 @@ jobs:
     env:
       DB: ${{ matrix.db-service }}
       SEARCH: ${{ matrix.search-service }}
-      EXTRAS: tests,${{ matrix.SEARCH_EXTRAS }}
+      EXTRAS: tests,${{ matrix.DB_EXTRAS }},${{ matrix.SEARCH_EXTRAS }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -47,7 +47,7 @@ jobs:
       - name: Generate dependencies
         run: |
           pip install wheel requirements-builder
-          requirements-builder -e "$EXTRAS" --level=${{ matrix.requirements-level }} setup.py > .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+          requirements-builder -e "$EXTRAS" --level=${{ matrix.requirements-level }} setup.py --req requirements-devel.txt > .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
           cat .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
 
       - name: Cache pip
