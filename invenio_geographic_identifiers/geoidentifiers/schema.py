@@ -59,7 +59,7 @@ class GeographicIdentifiersSchema(BaseVocabularySchema):
     # (subjects)``, here the ``id`` is ``required``
     id = SanitizedUnicode(required=True)
     scheme = SanitizedUnicode(required=True)
-    name = SanitizedUnicode(required=True)
+    name = fields.List(required=True, cls_or_instance=SanitizedUnicode(required=True))
     locations = fields.List(
         required=True, cls_or_instance=fields.Nested(LocationSchema)
     )

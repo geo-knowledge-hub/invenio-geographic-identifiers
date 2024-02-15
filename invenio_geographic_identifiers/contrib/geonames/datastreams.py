@@ -8,6 +8,8 @@
 
 """Geonames datastreams."""
 
+from itertools import chain
+
 from invenio_access.permissions import system_identity
 from invenio_vocabularies.datastreams.transformers import BaseTransformer
 from invenio_vocabularies.datastreams.writers import ServiceWriter
@@ -26,10 +28,18 @@ class GeoNamesTransformer(BaseTransformer):
         stream_entry.entry = {
             "id": f"geonames::{stream_entry.entry['geonameid']}",
             "scheme": "geonames",
-            "name": (
-                stream_entry.entry.get("asciiname")
-                or stream_entry.entry.get("name")
-                or stream_entry.entry.get("alternativenames")
+            "name": list(
+                chain(
+                    *list(
+                        filter(
+                            lambda x: x is not None,
+                            map(
+                                lambda y: stream_entry.entry.get(y),
+                                ["asciiname", "name", "alternativenames"],
+                            ),
+                        )
+                    )
+                )
             ),
             "locations": [
                 {
