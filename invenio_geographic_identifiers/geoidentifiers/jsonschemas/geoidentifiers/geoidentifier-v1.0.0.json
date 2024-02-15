@@ -21,7 +21,10 @@
     },
     "name": {
       "description": "Human readable label.",
-      "type": "string"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "locations": {
       "type": "array",
