@@ -21,9 +21,9 @@ class GeographicIdentifiersSearchOptions(SearchOptions):
     suggest_parser_cls = FilteredSuggestQueryParser.factory(
         filter_field="scheme",
         fields=[  # suggest fields
-            "name^100",
-            "name._2gram",
-            "name._3gram",
+            "extras^100",
+            "extras._2gram",
+            "extras._3gram",
         ],
     )
 

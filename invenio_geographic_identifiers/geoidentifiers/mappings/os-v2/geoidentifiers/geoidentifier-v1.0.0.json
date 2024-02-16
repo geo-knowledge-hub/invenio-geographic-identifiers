@@ -46,6 +46,14 @@
           }
         }
       },
+      "extras": {
+        "type": "text",
+        "fields": {
+          "suggest": {
+            "type": "search_as_you_type"
+          }
+        }
+      },
       "pid": {
         "type": "object",
         "properties": {
