@@ -55,11 +55,33 @@ class LocationSchema(Schema):
 class GeographicIdentifiersSchema(BaseVocabularySchema):
     """Service schema for geographic identifiers."""
 
-    # following the definition made in the ``invenio-vocabularies
-    # (subjects)``, here the ``id`` is ``required``
+    #
+    # Identifier
+    #
     id = SanitizedUnicode(required=True)
+
+    #
+    # Scheme
+    #
     scheme = SanitizedUnicode(required=True)
-    name = fields.List(required=True, cls_or_instance=SanitizedUnicode(required=True))
+
+    #
+    # Identifier name (e.g., Geonames feature name)
+    #
+    name = SanitizedUnicode(required=True)
+
+    #
+    # Location (e.g., list of points)
+    #
     locations = fields.List(
         required=True, cls_or_instance=fields.Nested(LocationSchema)
+    )
+
+    #
+    # Extra metadata (This field is used in the search)
+    #
+    extras = fields.List(
+        required=True,
+        cls_or_instance=SanitizedUnicode(required=True),
+        load_only=True,
     )
