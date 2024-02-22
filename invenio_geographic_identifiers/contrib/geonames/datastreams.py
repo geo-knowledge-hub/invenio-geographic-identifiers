@@ -10,6 +10,7 @@
 
 from itertools import chain
 
+import pycountry
 from invenio_access.permissions import system_identity
 from invenio_vocabularies.datastreams.transformers import BaseTransformer
 from invenio_vocabularies.datastreams.writers import ServiceWriter
@@ -25,21 +26,19 @@ class GeoNamesTransformer(BaseTransformer):
 
     def apply(self, stream_entry, *args, **kwargs):
         """Applies the transformation to the entry."""
+        record_country = []
+
+        country_code = stream_entry.entry.get("country_code")
+        country_code = pycountry.countries.get(alpha_2=country_code)
+
+        if country_code:
+            record_country = [country_code.name, country_code.official_name]
+
         stream_entry.entry = {
             "id": f"geonames::{stream_entry.entry['geonameid']}",
             "scheme": "geonames",
-            "name": list(
-                chain(
-                    *list(
-                        filter(
-                            lambda x: x is not None,
-                            map(
-                                lambda y: stream_entry.entry.get(y),
-                                ["asciiname", "name", "alternativenames"],
-                            ),
-                        )
-                    )
-                )
+            "name": (
+                stream_entry.entry.get("name") or stream_entry.entry.get("asciiname")
             ),
             "locations": [
                 {
@@ -52,6 +51,22 @@ class GeoNamesTransformer(BaseTransformer):
                     }
                 }
             ],
+            "extras": list(
+                chain(
+                    *[
+                        list(
+                            filter(
+                                lambda x: x is not None and x.strip(),
+                                map(
+                                    lambda y: stream_entry.entry.get(y),
+                                    ["asciiname", "name", "alternativenames"],
+                                ),
+                            )
+                        ),
+                        record_country,
+                    ]
+                )
+            ),
         }
 
         return stream_entry

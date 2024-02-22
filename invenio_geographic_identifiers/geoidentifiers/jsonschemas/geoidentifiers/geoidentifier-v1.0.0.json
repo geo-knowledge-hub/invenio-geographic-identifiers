@@ -21,10 +21,7 @@
     },
     "name": {
       "description": "Human readable label.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "type": "string"
     },
     "locations": {
       "type": "array",
@@ -33,6 +30,13 @@
         "geometry": {
           "$ref": "local://records/definitions-v2.0.0.json#/GeoJSON-Geometry"
         }
+      }
+    },
+    "extras": {
+      "description": "Extra metadata about the identifier.",
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     }
   }
