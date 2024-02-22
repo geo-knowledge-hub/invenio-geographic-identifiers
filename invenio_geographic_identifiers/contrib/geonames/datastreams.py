@@ -51,22 +51,7 @@ class GeoNamesTransformer(BaseTransformer):
                     }
                 }
             ],
-            "extras": list(
-                chain(
-                    *[
-                        list(
-                            filter(
-                                lambda x: x is not None and x.strip(),
-                                map(
-                                    lambda y: stream_entry.entry.get(y),
-                                    ["asciiname", "name", "alternativenames"],
-                                ),
-                            )
-                        ),
-                        record_country,
-                    ]
-                )
-            ),
+            "extras": [stream_entry.entry.get("asciiname"), *record_country],
         }
 
         return stream_entry
