@@ -29,5 +29,6 @@ def test_init():
     app = Flask("testapp")
     ext = InvenioGeographicIdentifiers()
     assert "invenio-geographic-identifiers" not in app.extensions
+
     ext.init_app(app)
     assert "invenio-geographic-identifiers" in app.extensions
