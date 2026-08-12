@@ -64,3 +64,24 @@ class InvenioGeographicIdentifiers(object):
             service=self.geoidentifiers_service,
             config=GeographicIdentifiersResourceConfig,
         )
+
+
+def init(app):
+    """Register the service and its indexer."""
+    ext = app.extensions["invenio-geographic-identifiers"]
+
+    sregistry = app.extensions["invenio-records-resources"].registry
+    sregistry.register(ext.geoidentifiers_service, service_id="geoidentifiers")
+
+    iregistry = app.extensions["invenio-indexer"].registry
+    iregistry.register(ext.geoidentifiers_service.indexer, indexer_id="geoidentifiers")
+
+
+def finalize_app(app):
+    """Finalize the UI application."""
+    init(app)
+
+
+def api_finalize_app(app):
+    """Finalize the API application."""
+    init(app)

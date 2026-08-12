@@ -34,7 +34,7 @@ record_type = RecordTypeFactory(
         ]
     ),
     # Service Layer
-    service_id="geoidentifier",
+    service_id="geoidentifiers",
     service_schema=GeographicIdentifiersSchema,
     search_options=GeographicIdentifiersSearchOptions,
     service_components=service_components,

@@ -61,17 +61,21 @@ def _process_vocab(config, num_samples=None):
     left = num_samples or -1
     for result in ds.process():
         left = left - 1
+
         if result.filtered:
             filtered += 1
+
         if result.errors:
             for err in result.errors:
                 click.secho(err, fg="red")
             errored += 1
         else:
             success += 1
+
         if left == 0:
             click.secho(f"Number of samples reached {num_samples}", fg="green")
             break
+
     return success, errored, filtered
 
 
@@ -143,14 +147,16 @@ def update(vocabulary, filepath=None, origin=None):
 @with_appcontext
 def delete(vocabulary, identifier, all):
     """Delete all items or a specific one of the vocabulary."""
-    if not id and not all:
+    if not identifier and not all:
         click.secho("An identifier or the --all flag " "must be present.", fg="red")
         exit(1)
 
     service = get_service_for_vocabulary(vocabulary)
+
     if identifier:
         try:
-            if service.delete(identifier, system_identity):
+            if service.delete(system_identity, identifier):
                 click.secho(f"{identifier} deleted " f"from {vocabulary}.", fg="green")
+
         except (PIDDeletedError, PIDDoesNotExistError):
             click.secho(f"PID {identifier} not found.")
