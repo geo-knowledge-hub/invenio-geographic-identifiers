@@ -1,4 +1,18 @@
 {
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "geoidentifier_name": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
   "mappings": {
     "dynamic": "strict",
     "properties": {
@@ -29,10 +43,12 @@
       },
       "name": {
         "type": "text",
+        "analyzer": "geoidentifier_name",
         "copy_to": "name_sort",
         "fields": {
           "suggest": {
-            "type": "search_as_you_type"
+            "type": "search_as_you_type",
+            "analyzer": "geoidentifier_name"
           }
         }
       },
@@ -47,10 +63,126 @@
         }
       },
       "extras": {
-        "type": "text",
-        "fields": {
-          "suggest": {
-            "type": "search_as_you_type"
+        "properties": {
+          "ascii_name": {
+            "type": "text",
+            "fields": {
+              "suggest": {
+                "type": "search_as_you_type",
+                "analyzer": "geoidentifier_name"
+              }
+            },
+            "analyzer": "geoidentifier_name"
+          },
+          "alternate_names": {
+            "type": "text",
+            "fields": {
+              "suggest": {
+                "type": "search_as_you_type",
+                "analyzer": "geoidentifier_name"
+              }
+            },
+            "analyzer": "geoidentifier_name"
+          },
+          "country": {
+            "properties": {
+              "code": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  }
+                },
+                "analyzer": "geoidentifier_name"
+              },
+              "official_name": {
+                "type": "text"
+              }
+            }
+          },
+          "admin": {
+            "properties": {
+              "level1": {
+                "properties": {
+                  "code": {
+                    "type": "keyword"
+                  },
+                  "name": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword"
+                      }
+                    },
+                    "analyzer": "geoidentifier_name"
+                  }
+                }
+              },
+              "level2": {
+                "properties": {
+                  "code": {
+                    "type": "keyword"
+                  },
+                  "name": {
+                    "type": "text"
+                  }
+                }
+              },
+              "level3": {
+                "properties": {
+                  "code": {
+                    "type": "keyword"
+                  },
+                  "name": {
+                    "type": "text"
+                  }
+                }
+              },
+              "level4": {
+                "properties": {
+                  "code": {
+                    "type": "keyword"
+                  },
+                  "name": {
+                    "type": "text"
+                  }
+                }
+              }
+            }
+          },
+          "feature": {
+            "properties": {
+              "class": {
+                "type": "keyword"
+              },
+              "class_name": {
+                "type": "text"
+              },
+              "code": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "text"
+              }
+            }
+          },
+          "population": {
+            "type": "long"
+          },
+          "elevation": {
+            "type": "integer"
+          },
+          "dem": {
+            "type": "integer"
+          },
+          "timezone": {
+            "type": "keyword"
+          },
+          "modified": {
+            "type": "date"
           }
         }
       },

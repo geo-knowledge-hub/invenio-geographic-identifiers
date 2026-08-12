@@ -1,9 +1,20 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2022 GEO Secretariat.
+#
+# invenio-geographic-identifiers is free software; you can redistribute it
+# and/or modify it under the terms of the MIT License; see LICENSE file for
+# more details.
+
+"""Test alembic recipes for Invenio-Geographic-Identifiers."""
+
 import pytest
 from invenio_db.utils import drop_alembic_version_table
 
 
 def assert_alembic(alembic, table_excludes):
     """Assert that metadata of alembic and db matches.
+
     This method allows omitting tables dynamically created for tests.
     """
     assert not list(
@@ -25,7 +36,7 @@ def test_alembic(base_app, database):
         raise pytest.skip("Upgrades are not supported on SQLite.")
 
     # Check that this package's SQLAlchemy models have been properly registered
-    tables = [x.name for x in db.get_tables_for_bind()]
+    tables = [x for x in db.metadata.tables]
     assert "geoidentifier_metadata" in tables
 
     # Check that Alembic agrees that there's no further tables to create.

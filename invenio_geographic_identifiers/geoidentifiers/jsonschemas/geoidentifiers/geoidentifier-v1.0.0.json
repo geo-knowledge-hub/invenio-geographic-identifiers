@@ -26,18 +26,195 @@
     "locations": {
       "type": "array",
       "description": "Array of geometries",
-      "properties": {
-        "geometry": {
-          "$ref": "local://records/definitions-v2.0.0.json#/GeoJSON-Geometry"
+      "items": {
+        "type": "object",
+        "properties": {
+          "geometry": {
+            "$ref": "#/definitions/GeoJSON-Geometry"
+          }
         }
       }
     },
     "extras": {
-      "description": "Extra metadata about the identifier.",
-      "type": "array",
-      "items": {
-        "type": "string"
+      "description": "Extra metadata that makes the identifier recognisable. Every field is optional; the source data leaves most of them empty for most places.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ascii_name": {
+          "description": "Name transliterated to plain ASCII.",
+          "type": "string"
+        },
+        "alternate_names": {
+          "description": "Other names the place is known by, including translations.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "country": {
+          "description": "Country the identifier belongs to.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "official_name": {
+              "type": "string"
+            }
+          }
+        },
+        "admin": {
+          "description": "Administrative divisions containing the identifier, outermost first. Only first-order divisions carry a name.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "level1": {
+              "$ref": "#/definitions/AdministrativeLevel"
+            },
+            "level2": {
+              "$ref": "#/definitions/AdministrativeLevel"
+            },
+            "level3": {
+              "$ref": "#/definitions/AdministrativeLevel"
+            },
+            "level4": {
+              "$ref": "#/definitions/AdministrativeLevel"
+            }
+          }
+        },
+        "feature": {
+          "description": "Kind of place the identifier denotes.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "class": {
+              "description": "Single-letter feature class.",
+              "type": "string"
+            },
+            "class_name": {
+              "type": "string"
+            },
+            "code": {
+              "description": "Feature code within the class.",
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "population": {
+          "type": "integer"
+        },
+        "elevation": {
+          "description": "Elevation in metres.",
+          "type": "integer"
+        },
+        "dem": {
+          "description": "Digital elevation model reading in metres, used where no surveyed elevation exists.",
+          "type": "integer"
+        },
+        "timezone": {
+          "description": "IANA time zone identifier.",
+          "type": "string"
+        },
+        "modified": {
+          "description": "Date the source last modified the entry.",
+          "type": "string"
+        }
       }
+    }
+  },
+  "definitions": {
+    "AdministrativeLevel": {
+      "title": "Administrative division",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "GeoJSON-Geometry": {
+      "title": "GeoJSON Geometry",
+      "oneOf": [
+        {
+          "title": "GeoJSON Point",
+          "type": "object",
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "Point"
+              ]
+            },
+            "coordinates": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "number"
+              }
+            },
+            "bbox": {
+              "type": "array",
+              "minItems": 4,
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "title": "GeoJSON Polygon",
+          "type": "object",
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "Polygon"
+              ]
+            },
+            "coordinates": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "minItems": 4,
+                "items": {
+                  "type": "array",
+                  "minItems": 2,
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "bbox": {
+              "type": "array",
+              "minItems": 4,
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
