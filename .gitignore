@@ -68,3 +68,6 @@ target/
 
 # IDEs
 .vscode/
+
+# Extras
+_resources/

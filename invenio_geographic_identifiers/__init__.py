@@ -10,5 +10,8 @@
 
 from .ext import InvenioGeographicIdentifiers
 
-__version__ = "0.4.0.dev0"
-__all__ = ("__version__", "InvenioGeographicIdentifiers")
+__version__ = "0.6.0"
+__all__ = (
+    "__version__",
+    "InvenioGeographicIdentifiers",
+)
