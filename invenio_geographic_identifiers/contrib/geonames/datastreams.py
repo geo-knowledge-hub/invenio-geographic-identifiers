@@ -8,10 +8,13 @@
 
 """Geonames datastreams."""
 
+import csv
+
 import pycountry
-from invenio_access.permissions import system_identity
+from invenio_vocabularies.datastreams.errors import ReaderError
 from invenio_vocabularies.datastreams.transformers import BaseTransformer
 
+from ...datastreams.download import setting
 from ...datastreams.readers import ZippedCSVReader
 from ...datastreams.writers import GeoIdentifierServiceWriter
 from .lookups import NO_ELEVATION, admin1_name, feature_class_name, feature_name
@@ -19,12 +22,48 @@ from .lookups import NO_ELEVATION, admin1_name, feature_class_name, feature_name
 #
 # Constant - Administrative levels columns
 #
-ADMIN_LEVELS = ("admin1_code", "admin2_code", "admin3_code", "admin4_code")
+ADMIN_LEVELS = (
+    "admin1_code",
+    "admin2_code",
+    "admin3_code",
+    "admin4_code",
+)
 
 
 #
 # Helpers
 #
+def _feature_class_set(feature_classes):
+    """Normalise the feature classes to keep.
+
+    Args:
+        feature_classes: A list or a comma-separated string of
+                         feature classes to keep.
+
+    Returns:
+        A set of feature classes to keep.
+    """
+    if feature_classes is None:
+        return None
+
+    # Split string into a list if required
+    if isinstance(feature_classes, str):
+        feature_classes = feature_classes.split(",")
+
+    # Keep only the values that are not empty
+    values_to_keep = {value.strip() for value in feature_classes if value.strip()}
+
+    # Empty values are not allowed
+    if not values_to_keep:
+        # An empty selection is a mistake worth naming: read as "keep nothing"
+        # it imports an empty vocabulary, and as "keep everything" it silently
+        # ignores what was asked for.
+        raise ReaderError("`feature_classes` was given, but names no class.")
+
+    # Return!
+    return values_to_keep
+
+
 def _compact(mapping):
     """Drop the keys that carry no value."""
     return {
@@ -166,6 +205,79 @@ def _locations(row):
 
 
 #
+# Readers
+#
+class GeoNamesReader(ZippedCSVReader):
+    """Reads a GeoNames dump, optionally restricted to some feature classes.
+
+    A full `allCountries` dump is 13.4 million rows, and more than half of them
+    are streams, farm buildings, hills and stretches of road. An instance that
+    wants a place-name vocabulary can say so and skip the rest: `P` and `A`
+    alone, populated places and administrative divisions, are 5.8 million.
+
+    Filtering here, rather than in `DataStream.filter`, is deliberate. A row
+    dropped by the reader is never transformed, and `DataStreamFactory` always
+    builds a plain `DataStream`, so its `filter` hook cannot be reached without
+    replacing the factory.
+
+    Shards are unaffected: the rows are numbered before the filter runs, so the
+    same shard covers the same rows whatever the filter is set to.
+    """
+
+    def __init__(self, *args, feature_classes=None, **kwargs):
+        """Initializer.
+
+        Args:
+            *args: Arguments for the parent class.
+
+            feature_classes: GeoNames feature classes to keep, as a list or
+                             a comma-separated string. `None` keeps all.
+
+            **kwargs: Keyword arguments for the parent class.
+        """
+        # Setup the feature classes to keep
+        self.feature_classes = _feature_class_set(feature_classes)
+
+        # Initialize the parent class
+        super().__init__(*args, **kwargs)
+
+        # Check if the feature classes are not None and the rows
+        # are not read as dicts
+        if self.feature_classes is not None and not self.as_dict:
+            raise ReaderError("`feature_classes` needs the rows read as dicts.")
+
+    def _default_origin_url(self):
+        """Where a dump comes from when the caller did not say.
+
+        Returns:
+            The configured GeoNames dump URL.
+        """
+        return setting("INVENIO_GEOGRAPHIC_IDENTIFIERS_GEONAMES_DUMP_URL")
+
+    def _iter(self, fp, *args, **kwargs):
+        """Read the dump."""
+        # Read the rows from the file
+        rows = super()._iter(fp, *args, **kwargs)
+
+        # If no feature classes are specified, yield all rows
+        if self.feature_classes is None:
+            yield from rows
+            return
+
+        # Otherwise, iterate over the rows
+        for row in rows:
+            # Get the feature class from the row
+            row_feature_class = (row.get("feature_class") or "").strip()
+
+            # Check if we should keep the row
+            row_to_keep = row_feature_class in self.feature_classes
+
+            # Yield the row if we should keep it
+            if row_to_keep:
+                yield row
+
+
+#
 # Transformers
 #
 class GeoNamesTransformer(BaseTransformer):
@@ -204,7 +316,7 @@ VOCABULARIES_DATASTREAM_TRANSFORMERS = {
 
 VOCABULARIES_DATASTREAM_WRITERS = {"geonames-service": GeoNamesServiceWriter}
 
-VOCABULARIES_DATASTREAM_READERS = {"geonames-reader": ZippedCSVReader}
+VOCABULARIES_DATASTREAM_READERS = {"geonames-reader": GeoNamesReader}
 
 DATASTREAM_CONFIG = {
     "readers": [
@@ -234,6 +346,11 @@ DATASTREAM_CONFIG = {
                         "modification_date",
                     ],
                     "delimiter": "\t",
+                    # A GeoNames dump is unquoted: tabs separate the fields and
+                    # nothing escapes anything. Left to its default the `csv`
+                    # module treats a leading double quote as a quoted field and
+                    # eats it, which rewrites some names in the current dump.
+                    "quoting": csv.QUOTE_NONE,
                 }
             },
         }
@@ -242,10 +359,13 @@ DATASTREAM_CONFIG = {
     "writers": [
         {
             "type": "geonames-service",
-            "args": {
-                "service_or_name": "geoidentifiers",
-                "identity": system_identity,
-            },
+            # No `identity` here on purpose. The writer defaults to
+            # `system_identity`, and an `Identity` object cannot be serialized:
+            # this configuration travels to a Celery worker as a task argument,
+            # and both serializers Invenio can be configured with refuse it.
+            "args": {"service_or_name": "geoidentifiers"},
         }
     ],
+    "batch_size": 1000,
+    "write_many": False,
 }

@@ -24,19 +24,27 @@ To start, you first need to install the Python distribution in your instance. Fo
 invenio-geographic-identifiers = {git = "https://github.com/geo-knowledge-hub/invenio-geographic-identifiers.git"}
 ```
 
-The vocabulary, its REST resource, its search mapping and its database tables are all registered automatically. The one thing an instance has to declare is where the datastreams come from, because the readers, transformers and writers are resolved by name from the application configuration. For this, in your `invenio.cfg` you can include the values defined by the package:
+The vocabulary, its REST resource, its search mapping, its import job and its database tables are all registered automatically. The one thing an instance has to declare is where the datastreams come from, because the readers, transformers and writers are resolved by name from the application configuration. For this, in your `invenio.cfg` you can include the values defined by the package:
 
 ```python
+from invenio_vocabularies.config import (
+    VOCABULARIES_DATASTREAM_READERS,
+    VOCABULARIES_DATASTREAM_TRANSFORMERS,
+    VOCABULARIES_DATASTREAM_WRITERS,
+)
+
 from invenio_geographic_identifiers.contrib.geonames.datastreams import (
     VOCABULARIES_DATASTREAM_READERS as GEONAMES_READERS,
     VOCABULARIES_DATASTREAM_TRANSFORMERS as GEONAMES_TRANSFORMERS,
     VOCABULARIES_DATASTREAM_WRITERS as GEONAMES_WRITERS,
 )
 
-VOCABULARIES_DATASTREAM_READERS = {**GEONAMES_READERS}
-VOCABULARIES_DATASTREAM_TRANSFORMERS = {**GEONAMES_TRANSFORMERS}
-VOCABULARIES_DATASTREAM_WRITERS = {**GEONAMES_WRITERS}
+VOCABULARIES_DATASTREAM_READERS = {**VOCABULARIES_DATASTREAM_READERS, **GEONAMES_READERS}
+VOCABULARIES_DATASTREAM_TRANSFORMERS = {**VOCABULARIES_DATASTREAM_TRANSFORMERS, **GEONAMES_TRANSFORMERS}
+VOCABULARIES_DATASTREAM_WRITERS = {**VOCABULARIES_DATASTREAM_WRITERS, **GEONAMES_WRITERS}
 ```
+
+Merging the `invenio_vocabularies` values rather than replacing them is not optional. `InvenioVocabularies` registers its own with `setdefault`, and the configuration file is read first, so a bare `{**GEONAMES_READERS}` removes every reader, transformer and writer InvenioRDM ships, including the ones the ROR, OpenAIRE and ORCID vocabularies need.
 
 Then install the package and create the tables and the search index:
 
@@ -61,6 +69,65 @@ invenio geoidentifiers delete -v geonames -i geonames::2657896
 ```
 
 Once loaded, the vocabulary answers on `/api/geoidentifiers`.
+
+## Loading the full dump
+
+`allCountries.zip` holds `13,446,834` rows. Reading and transforming all of them takes under two minutes on one core. Writing them is what takes the time, because every entry is validated, stored and indexed. The import can therefore be split across workers, and it should be.
+
+### Splitting the work
+
+A run can be divided into shards. Each shard reads the whole dump but keeps only its own rows, so between them they cover it exactly once:
+
+```shell
+# One shard, in this process. Run these in parallel however you like
+invenio geoidentifiers import -v geonames -o allCountries.zip --shards 8 --shard 0
+
+# Or hand every shard to a Celery worker
+invenio geoidentifiers import -v geonames -o allCountries.zip --shards 8 --celery
+```
+
+Shards are numbered from 0. The rows a shard covers depend only on its number and on how many shards there are, so a shard that fails can be re-run on its own without disturbing the others.
+
+### Draining the indexer queue
+
+Batched writing does not index inline. It publishes record ids to a queue that something else has to consume:
+
+```shell
+invenio index run
+```
+
+Run it alongside the import, or in a loop after it. Without it the records land in the database and the search index stays empty.
+
+### Importing only what you need
+
+More than half of GeoNames consists of streams, farm buildings, hillsides and stretches of road. The `--feature-classes` option narrows a run to the classes an instance actually serves:
+
+```shell
+invenio geoidentifiers import -v geonames -o allCountries.zip --feature-classes P,A
+```
+
+The table below gives the meaning of each feature class available in GeoNames:
+
+| classes | rows | meaning |
+|---|---:|---|
+| `P` | 5,215,299 | populated places |
+| `H` | 2,610,403 | streams, lakes |
+| `S` | 2,543,712 | spots, buildings, farms |
+| `T` | 1,837,270 | mountains, hills |
+| `A` | 543,475 | administrative divisions |
+| `L` | 494,213 | parks, areas |
+| `V` | 123,702 | forest, vegetation |
+| `R` | 58,170 | roads, railroads |
+| `U` | 15,587 | undersea |
+| `P,A` | **5,758,774** | **place names and the divisions containing them** |
+
+If `--feature-classes` is not given, everything is imported.
+
+### From the administration interface
+
+The import is also registered as an InvenioRDM v13 job, `Import GeoNames`, so it can be run from the administration interface instead of the command line.
+
+Note that InvenioRDM does not ship the scheduler beat that dispatches job runs. [It has to be deployed per instance](https://inveniordm.docs.cern.ch/operate/customize/jobs/). Without one, nothing runs from the administration interface. The CLI needs no such thing.
 
 ## Development
 

@@ -243,26 +243,74 @@ def clean_geoidentifiers(request):
 #
 # Datastreams
 #
-@pytest.fixture()
-def geonames_archive(tmp_path):
-    """GeoNames dump fixture."""
+def write_geonames_archive(path, rows):
+    """Write rows to a zipped dump in the layout of `allCountries.zip`."""
     buffer = io.StringIO()
     writer = csv.DictWriter(
-        buffer, fieldnames=GEONAMES_FIELDNAMES, delimiter="\t", lineterminator="\n"
+        buffer,
+        fieldnames=GEONAMES_FIELDNAMES,
+        delimiter="\t",
+        lineterminator="\n",
+        # A real dump quotes and escapes nothing, and a fixture that does would
+        # hide the very thing the reader has to get right.
+        quoting=csv.QUOTE_NONE,
+        quotechar=None,
     )
 
     # Write the rows
-    for row in GEONAMES_ROWS:
+    for row in rows:
         # The dump has no header and every column present, so absent keys are
         # written as the empty strings the reader would find there
         writer.writerow({name: row.get(name, "") for name in GEONAMES_FIELDNAMES})
 
-    # Create the archive
-    archive = tmp_path / "geonames.zip"
-
     # Write the file to the archive
-    with zipfile.ZipFile(archive, "w") as zf:
+    with zipfile.ZipFile(path, "w") as zf:
         zf.writestr("allCountries.txt", buffer.getvalue())
 
     # Return path
-    return str(archive)
+    return str(path)
+
+
+@pytest.fixture()
+def geonames_archive(tmp_path):
+    """GeoNames dump fixture."""
+    return write_geonames_archive(tmp_path / "geonames.zip", GEONAMES_ROWS)
+
+
+@pytest.fixture()
+def make_geonames_archive(tmp_path):
+    """Build a dump from arbitrary rows."""
+    created = 0
+
+    def _make(rows):
+        nonlocal created
+        created += 1
+
+        return write_geonames_archive(tmp_path / f"geonames-{created}.zip", rows)
+
+    return _make
+
+
+@pytest.fixture()
+def geonames_mixed_rows():
+    """Rows across the feature classes, for sharding and filtering."""
+    classes = ["P", "H", "S", "T", "A", "L", "V", "R", "U", ""]
+
+    return [
+        {
+            "geonameid": str(1000 + index),
+            "name": f"Place {index}",
+            "asciiname": f"Place {index}",
+            "latitude": "0.0",
+            "longitude": "0.0",
+            "feature_class": classes[index % len(classes)],
+            "country_code": "CH",
+        }
+        for index in range(50)
+    ]
+
+
+@pytest.fixture()
+def geonames_mixed_archive(tmp_path, geonames_mixed_rows):
+    """A dump holding rows of every feature class."""
+    return write_geonames_archive(tmp_path / "mixed.zip", geonames_mixed_rows)
