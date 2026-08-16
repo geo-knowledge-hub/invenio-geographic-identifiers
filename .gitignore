@@ -70,4 +70,5 @@ target/
 .vscode/
 
 # Extras
+.DS_Store
 _resources/
